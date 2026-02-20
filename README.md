@@ -36,7 +36,22 @@ lionfoxtechub/
 
 ## Deploy to Cloudflare Pages
 
-### Option A – Cloudflare Dashboard (recommended)
+### Option A – GitHub Actions (CI/CD, recommended)
+
+The repository includes a workflow at `.github/workflows/deploy.yml` that
+automatically deploys to Cloudflare Pages on every push to `main`.
+
+**One-time setup — add two GitHub repository secrets:**
+
+| Secret name | Where to find it |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | Cloudflare dashboard → **My Profile** → **API Tokens** → Create token with *Cloudflare Pages: Edit* permission |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → right-hand sidebar on any zone/account page |
+
+Once both secrets are set, every push to `main` (or a manual trigger via
+**Actions → Deploy to Cloudflare Pages → Run workflow**) will deploy the site.
+
+### Option B – Cloudflare Dashboard
 
 1. Go to [Cloudflare Pages](https://pages.cloudflare.com/).
 2. Click **Create a project** → **Connect to Git**.
@@ -45,7 +60,7 @@ lionfoxtechub/
 5. Set **Build output directory** to `/` (root).
 6. Click **Save and Deploy**.
 
-### Option B – Wrangler CLI
+### Option C – Wrangler CLI
 
 ```bash
 npm install -g wrangler
