@@ -63,7 +63,7 @@ Once both secrets are set, every push to `main` (or a manual trigger via
 ### Option C – Wrangler CLI
 
 ```bash
-npm install -g wrangler
+npm install -g wrangler@4
 wrangler login
 wrangler pages deploy . --project-name lionfoxtechub
 ```
