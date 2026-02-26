@@ -25,3 +25,4 @@ jobs:
           projectName: lionfoxtechub
           directory: .
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          wranglerVersion: '4'
