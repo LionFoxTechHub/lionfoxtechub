@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="LionFox TechHub – Real-time server monitoring dashboard. CPU, memory, disk, network, and process metrics at a glance." />
+  <title>Server Dashboard — LionFox TechHub</title>
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<div class="dash-layout">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar" aria-label="Dashboard navigation">
+
+    <a class="sidebar-logo" href="index.html">
+      <div class="logo-mark">🦁</div>
+      <div class="logo-text">
+        LionFox TechHub
+        <div class="logo-sub">Server Dashboard</div>
+      </div>
+    </a>
+
+    <div class="server-selector">
+      <div class="server-select-label">Active Server</div>
+      <button class="server-select-btn" type="button" aria-label="Select server">
+        <span class="server-dot"></span>
+        <span>vps-de-01 (Frankfurt)</span>
+        <span class="server-chevron">▾</span>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Dashboard sections">
+      <div class="nav-section-label">Monitoring</div>
+      <a href="#overview"   class="nav-item active"><span class="nav-icon">📊</span> Overview</a>
+      <a href="#cpu"        class="nav-item"><span class="nav-icon">⚡</span> CPU</a>
+      <a href="#memory"     class="nav-item"><span class="nav-icon">🧠</span> Memory</a>
+      <a href="#disk"       class="nav-icon-a nav-item"><span class="nav-icon">💾</span> Disk I/O</a>
+      <a href="#network"    class="nav-item"><span class="nav-icon">🌐</span> Network</a>
+
+      <div class="nav-section-label">System</div>
+      <a href="#processes"  class="nav-item"><span class="nav-icon">⚙️</span> Processes <span class="nav-badge">10</span></a>
+      <a href="#sysinfo"    class="nav-item"><span class="nav-icon">🖥️</span> System Info</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="index.html" class="sidebar-back-btn">
+        <span>←</span> Back to Main Site
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="dash-main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-menu-btn" id="sidebar-toggle" aria-label="Open menu" aria-expanded="false">☰</button>
+        <div>
+          <div class="topbar-title">Overview</div>
+          <div class="topbar-subtitle">vps-de-01 · Frankfurt, Germany 🇩🇪</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="refresh-badge" aria-live="polite" aria-label="Live updating">
+          <span class="refresh-dot"></span>
+          Live
+        </div>
+        <div class="topbar-time" id="topbar-clock" aria-live="polite">00:00:00</div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="dash-content">
+
+      <!-- STATUS BANNER -->
+      <div class="alert-banner" role="status">
+        <span class="alert-icon">✅</span>
+        <span class="alert-text">All systems operational — no alerts</span>
+        <span class="alert-time" id="uptime-badge">Uptime: <span id="uptime-val" class="uptime-ticker">0d 00:00:00</span></span>
+      </div>
+
+      <!-- ===== KPI CARDS ===== -->
+      <section id="overview" aria-label="Key metrics">
+        <div class="kpi-grid">
+
+          <div class="kpi-card cpu">
+            <div class="kpi-header">
+              <span class="kpi-label">CPU Usage</span>
+              <span class="kpi-icon">⚡</span>
+            </div>
+            <div class="kpi-value" id="kpi-cpu">—</div>
+            <div class="kpi-sub" id="kpi-cpu-sub">— cores active</div>
+            <div class="kpi-bar-track"><div class="kpi-bar-fill" id="bar-cpu" style="width:0%"></div></div>
+          </div>
+
+          <div class="kpi-card mem">
+            <div class="kpi-header">
+              <span class="kpi-label">Memory</span>
+              <span class="kpi-icon">🧠</span>
+            </div>
+            <div class="kpi-value" id="kpi-mem">—</div>
+            <div class="kpi-sub" id="kpi-mem-sub">— / 8 GB used</div>
+            <div class="kpi-bar-track"><div class="kpi-bar-fill" id="bar-mem" style="width:0%"></div></div>
+          </div>
+
+          <div class="kpi-card disk">
+            <div class="kpi-header">
+              <span class="kpi-label">Disk Usage</span>
+              <span class="kpi-icon">💾</span>
+            </div>
+            <div class="kpi-value" id="kpi-disk">—</div>
+            <div class="kpi-sub" id="kpi-disk-sub">— / 420 GB used</div>
+            <div class="kpi-bar-track"><div class="kpi-bar-fill" id="bar-disk" style="width:0%"></div></div>
+          </div>
+
+          <div class="kpi-card net">
+            <div class="kpi-header">
+              <span class="kpi-label">Network</span>
+              <span class="kpi-icon">🌐</span>
+            </div>
+            <div class="kpi-value" id="kpi-net">—</div>
+            <div class="kpi-sub" id="kpi-net-sub">↑ — ↓ —</div>
+            <div class="kpi-bar-track"><div class="kpi-bar-fill" id="bar-net" style="width:0%"></div></div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ===== CHARTS ===== -->
+      <div class="mid-grid">
+
+        <!-- CPU Chart -->
+        <div class="chart-card" id="cpu">
+          <div class="chart-card-header">
+            <span class="chart-title">CPU History (30s)</span>
+            <span class="chart-meta">8-core AMD EPYC</span>
+          </div>
+          <canvas id="cpuChart" class="dash-chart" height="120" aria-label="CPU usage history chart"></canvas>
+        </div>
+
+        <!-- Network Chart -->
+        <div class="chart-card" id="network">
+          <div class="chart-card-header">
+            <span class="chart-title">Network I/O (30s)</span>
+            <div class="chart-legend">
+              <span><span class="legend-dot" style="background:#f97316"></span>Upload</span>
+              <span><span class="legend-dot" style="background:#10b981"></span>Download</span>
+            </div>
+          </div>
+          <canvas id="netChart" class="dash-chart" height="120" aria-label="Network I/O history chart"></canvas>
+        </div>
+
+      </div>
+
+      <!-- ===== BOTTOM GRID ===== -->
+      <div class="bottom-grid">
+
+        <!-- Gauges + Core Bars -->
+        <div>
+          <div class="gauge-card" id="memory">
+            <div class="chart-card-header" style="margin-bottom:1rem">
+              <span class="chart-title">Resource Gauges</span>
+            </div>
+            <div class="gauges-row">
+
+              <div class="gauge-item">
+                <div class="gauge-canvas-wrap">
+                  <canvas class="gauge-arc" id="gauge-cpu" width="90" height="55" aria-label="CPU gauge"></canvas>
+                  <span class="gauge-val" id="gauge-cpu-val">—</span>
+                </div>
+                <div class="gauge-label">CPU</div>
+              </div>
+
+              <div class="gauge-item">
+                <div class="gauge-canvas-wrap">
+                  <canvas class="gauge-arc" id="gauge-mem" width="90" height="55" aria-label="Memory gauge"></canvas>
+                  <span class="gauge-val" id="gauge-mem-val">—</span>
+                </div>
+                <div class="gauge-label">Memory</div>
+              </div>
+
+              <div class="gauge-item">
+                <div class="gauge-canvas-wrap">
+                  <canvas class="gauge-arc" id="gauge-disk" width="90" height="55" aria-label="Disk gauge"></canvas>
+                  <span class="gauge-val" id="gauge-disk-val">—</span>
+                </div>
+                <div class="gauge-label">Disk</div>
+              </div>
+
+              <div class="gauge-item">
+                <div class="gauge-canvas-wrap">
+                  <canvas class="gauge-arc" id="gauge-load" width="90" height="55" aria-label="Average load gauge"></canvas>
+                  <span class="gauge-val" id="gauge-load-val">—</span>
+                </div>
+                <div class="gauge-label">Avg Load</div>
+              </div>
+
+            </div>
+
+            <!-- CPU Cores -->
+            <div style="margin-top:1.5rem">
+              <div class="chart-card-header" style="margin-bottom:0.75rem">
+                <span class="chart-title" style="font-size:0.82rem">CPU Cores</span>
+                <span class="chart-meta">8 × AMD EPYC vCPU</span>
+              </div>
+              <div style="display:flex;gap:0.4rem;align-items:flex-end;height:64px" aria-label="CPU core usage bars">
+                <!-- 8 core bars generated by JS -->
+                <div id="core-0" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                  <span id="core-val-0" style="font-size:0.58rem;color:var(--text-muted);font-variant-numeric:tabular-nums">0%</span>
+                  <div style="flex:1;width:100%;display:flex;align-items:flex-end">
+                    <div id="core-bar-0" style="width:100%;border-radius:3px 3px 0 0;background:var(--accent);transition:height 0.5s ease;min-height:2px"></div>
+                  </div>
+                </div>
+                <div id="core-1" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                  <span id="core-val-1" style="font-size:0.58rem;color:var(--text-muted);font-variant-numeric:tabular-nums">0%</span>
+                  <div style="flex:1;width:100%;display:flex;align-items:flex-end">
+                    <div id="core-bar-1" style="width:100%;border-radius:3px 3px 0 0;background:var(--accent);transition:height 0.5s ease;min-height:2px"></div>
+                  </div>
+                </div>
+                <div id="core-2" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                  <span id="core-val-2" style="font-size:0.58rem;color:var(--text-muted);font-variant-numeric:tabular-nums">0%</span>
+                  <div style="flex:1;width:100%;display:flex;align-items:flex-end">
+                    <div id="core-bar-2" style="width:100%;border-radius:3px 3px 0 0;background:var(--accent);transition:height 0.5s ease;min-height:2px"></div>
+                  </div>
+                </div>
+                <div id="core-3" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                  <span id="core-val-3" style="font-size:0.58rem;color:var(--text-muted);font-variant-numeric:tabular-nums">0%</span>
+                  <div style="flex:1;width:100%;display:flex;align-items:flex-end">
+                    <div id="core-bar-3" style="width:100%;border-radius:3px 3px 0 0;background:var(--accent);transition:height 0.5s ease;min-height:2px"></div>
+                  </div>
+                </div>
+                <div id="core-4" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                  <span id="core-val-4" style="font-size:0.58rem;color:var(--text-muted);font-variant-numeric:tabular-nums">0%</span>
+                  <div style="flex:1;width:100%;display:flex;align-items:flex-end">
+                    <div id="core-bar-4" style="width:100%;border-radius:3px 3px 0 0;background:var(--accent);transition:height 0.5s ease;min-height:2px"></div>
+                  </div>
+                </div>
+                <div id="core-5" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                  <span id="core-val-5" style="font-size:0.58rem;color:var(--text-muted);font-variant-numeric:tabular-nums">0%</span>
+                  <div style="flex:1;width:100%;display:flex;align-items:flex-end">
+                    <div id="core-bar-5" style="width:100%;border-radius:3px 3px 0 0;background:var(--accent);transition:height 0.5s ease;min-height:2px"></div>
+                  </div>
+                </div>
+                <div id="core-6" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                  <span id="core-val-6" style="font-size:0.58rem;color:var(--text-muted);font-variant-numeric:tabular-nums">0%</span>
+                  <div style="flex:1;width:100%;display:flex;align-items:flex-end">
+                    <div id="core-bar-6" style="width:100%;border-radius:3px 3px 0 0;background:var(--accent);transition:height 0.5s ease;min-height:2px"></div>
+                  </div>
+                </div>
+                <div id="core-7" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                  <span id="core-val-7" style="font-size:0.58rem;color:var(--text-muted);font-variant-numeric:tabular-nums">0%</span>
+                  <div style="flex:1;width:100%;display:flex;align-items:flex-end">
+                    <div id="core-bar-7" style="width:100%;border-radius:3px 3px 0 0;background:var(--accent);transition:height 0.5s ease;min-height:2px"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Processes -->
+        <div id="processes">
+          <div class="process-card">
+            <div class="chart-card-header" style="padding:1.25rem 1.25rem 0">
+              <span class="chart-title">Top Processes</span>
+              <span class="chart-meta">10 of 142 processes</span>
+            </div>
+            <div class="process-table-wrap">
+              <table class="process-table" aria-label="Running processes">
+                <thead>
+                  <tr>
+                    <th>PID</th>
+                    <th>Name</th>
+                    <th>CPU</th>
+                    <th>Memory</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="proc-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== SYSTEM INFO + DISK + NETWORK ===== -->
+      <div class="info-grid" id="sysinfo">
+
+        <!-- System Info -->
+        <div class="info-card">
+          <div class="chart-card-header" style="margin-bottom:1rem">
+            <span class="chart-title">System Info</span>
+          </div>
+          <ul class="info-list">
+            <li class="info-row"><span class="info-key">Hostname</span><span class="info-val code">vps-de-01</span></li>
+            <li class="info-row"><span class="info-key">OS</span><span class="info-val">Ubuntu 22.04 LTS</span></li>
+            <li class="info-row"><span class="info-key">Kernel</span><span class="info-val code">6.8.0-52-generic</span></li>
+            <li class="info-row"><span class="info-key">CPU</span><span class="info-val">AMD EPYC 7003 × 8</span></li>
+            <li class="info-row"><span class="info-key">RAM</span><span class="info-val">8 GB DDR4 ECC</span></li>
+            <li class="info-row"><span class="info-key">Storage</span><span class="info-val">420 GB NVMe SSD</span></li>
+            <li class="info-row"><span class="info-key">Location</span><span class="info-val">Frankfurt 🇩🇪</span></li>
+            <li class="info-row"><span class="info-key">Provider</span><span class="info-val">Vultr</span></li>
+            <li class="info-row"><span class="info-key">Status</span><span class="info-val online">● Online</span></li>
+            <li class="info-row"><span class="info-key">Uptime</span><span class="info-val code" id="uptime-sysinfo">—</span></li>
+          </ul>
+        </div>
+
+        <!-- Disk I/O -->
+        <div class="info-card" id="disk">
+          <div class="chart-card-header" style="margin-bottom:1rem">
+            <span class="chart-title">Disk I/O</span>
+          </div>
+          <div class="diskio-row">
+
+            <div class="diskio-item">
+              <div class="diskio-header">
+                <span class="diskio-name">/dev/sda</span>
+                <div class="diskio-vals">
+                  <span>↓ <span id="diskio-read-0">—</span></span>
+                  <span>↑ <span id="diskio-write-0">—</span></span>
+                </div>
+              </div>
+              <div class="diskio-bar-track">
+                <div class="diskio-bar-fill" id="diskio-bar-0" style="width:0%"></div>
+              </div>
+            </div>
+
+            <div class="diskio-item">
+              <div class="diskio-header">
+                <span class="diskio-name">/dev/sdb</span>
+                <div class="diskio-vals">
+                  <span>↓ <span id="diskio-read-1">—</span></span>
+                  <span>↑ <span id="diskio-write-1">—</span></span>
+                </div>
+              </div>
+              <div class="diskio-bar-track">
+                <div class="diskio-bar-fill" id="diskio-bar-1" style="width:0%"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Network I/O -->
+          <div style="margin-top:1.5rem">
+            <div class="chart-card-header" style="margin-bottom:0.75rem">
+              <span class="chart-title" style="font-size:0.82rem">Network I/O</span>
+              <span class="chart-meta">eth0</span>
+            </div>
+            <div class="netio-stat-row">
+              <div class="netio-stat">
+                <div class="netio-stat-label">↑ Upload</div>
+                <div class="netio-stat-val up" id="net-up-val">—</div>
+              </div>
+              <div class="netio-stat">
+                <div class="netio-stat-label">↓ Download</div>
+                <div class="netio-stat-val down" id="net-down-val">—</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div><!-- /dash-content -->
+  </main><!-- /dash-main -->
+</div><!-- /dash-layout -->
+
+<script src="dashboard.js"></script>
+<script>
+  // Keep uptime in sysinfo card in sync with topbar ticker
+  setInterval(() => {
+    const src = document.getElementById('uptime-val');
+    const dst = document.getElementById('uptime-sysinfo');
+    if (src && dst) dst.textContent = src.textContent;
+  }, 1000);
+</script>
+</body>
+</html>
